@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  manustetic-agent:
+    build: .
+    container_name: agente_clinica_manustetic
+    ports:
+      - "8501:8501"
+    volumes:
+      - .:/app
+      - ./appointments.db:/app/appointments.db
+    environment:
+      - GROQ_API_KEY=${GROQ_API_KEY}
+    env_file:
+      - .env
+    restart: unless-stopped
