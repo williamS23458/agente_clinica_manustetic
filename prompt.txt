@@ -1,137 +1,104 @@
-Crie um projeto Python completo chamado "agente_clinica_manustetic" 
-para uma clínica estética chamada Manustetic.
+## CORREÇÕES URGENTES:
+- BUG 1: Erro <string> e IA para após 3 msgs
+- BUG 2: Aceitar datas naturais (27/04, amanhã, hoje)
+- BUG 3: Conflito de horário não bloqueia
+- BUG 4: Usar fuso de Brasília (America/Sao_Paulo)
 
-## ESTRUTURA DE ARQUIVOS:
-agente_clinica_manustetic/
-├── .env.example
-├── .gitignore
-├── agent.py
-├── app.py
-├── docker-compose.yml
-├── Dockerfile
-├── requirements.txt
-└── README.md
+## ATUALIZAR SERVIÇOS REAIS:
+1. Limpeza de Pele - R$ 140,00
+2. Microagulhamento Facial - R$ 150,00
+3. Microagulhamento (estrias) - Avaliar
+4. Dermaplening - R$ 50,00
+5. Nutri Gloss - R$ 100,00
+6. Design de Sobrancelhas - R$ 30,00
+7. Massagem Relaxante - R$ 120,00
+8. Drenagem Corporal - R$ 120,00
+9. Massagem Profunda (miofacial) - R$ 130,00
+10. Epilação a Laser - Avaliar
 
-## TECNOLOGIAS:
-- Framework: Agno
-- Modelo: Groq (primary: openai/gpt-oss-120b, fallback: llama-3.3-70b-versatile)
-- Banco de dados: DuckDB local (arquivo appointments.db na raiz do projeto)
-- Interface: Streamlit
-- Idioma: Português do Brasil (pt-BR)
+## CONTATO DA CLÍNICA:
+- Nome: Manu Santos Esthetic
+- WhatsApp: +55 11 95186-3253
+- Botão clicável na sidebar:
+  https://wa.me/5511951863253
 
-## REGRAS DE NEGÓCIO:
-- Horário de funcionamento: Segunda a Sábado, 08:00 às 19:00
-- Fechado aos domingos
-- Formato de data: dd-mm-yyyy HH:MM (24h)
-- Duração padrão de cada procedimento: 1 hora
-- Limite de sessão: 15 mensagens
+## DESIGN DA INTERFACE:
+- Tema verde sage botânico
+- Cores: #8B9D77, #D4DCC2, #F5F5F0, #FFFFFF
+- Estilo minimalista botânico
 
-## BANCO DE DADOS DUCKDB:
-- Arquivo: appointments.db
-- Criar função init_db() que inicializa a tabela se não existir
-- Fazer migration automática se colunas novas forem adicionadas
-- Estrutura da tabela appointments:
-  id VARCHAR,
-  customer_name VARCHAR,
-  appointment_time TIMESTAMP,
-  service VARCHAR,
-  status VARCHAR DEFAULT 'scheduled',
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+## FOTO DA CLÍNICA:
+- Adicionar clinica.jpg no topo
+- Largura 100% responsiva
+- Bordas arredondadas e sombra suave
 
-## SERVIÇOS DA CLÍNICA:
-1. Limpeza de Pele
-2. Botox
-3. Preenchimento Labial
-4. Drenagem Linfática
-5. Massagem Modeladora
-6. Design de Sobrancelhas
+## CARDS DE TRATAMENTOS COM EXPANDER:
+Cards clicáveis na sidebar com descrições:
 
-## FERRAMENTAS QUE O AGENTE DEVE TER (functions/tools):
+LIMPEZA DE PELE - R$ 140,00
+"Tratamento profundo que remove impurezas, 
+cravos e células mortas."
 
-1. schedule_appointment(customer_name, appointment_time, service)
-   - Conectar no DuckDB e verificar se já existe agendamento
-     no mesmo horário com status 'scheduled' ou 'rescheduled'
-   - Se ocupado: retornar mensagem de conflito 
-     + buscar e sugerir os 3 próximos horários livres do dia
-   - Se livre: inserir no DuckDB e retornar ID no formato
-     APPT-{timestamp}
+MICROAGULHAMENTO FACIAL - R$ 150,00
+"Estimula colágeno e elastina. Reduz manchas 
+e cicatrizes de acne."
 
-2. reschedule_appointment(appointment_id, new_time)
-   - Verificar se appointment_id existe no DuckDB
-   - Verificar se o novo horário está livre
-   - Se ocupado: sugerir 3 próximos horários livres
-   - Se livre: UPDATE no DuckDB com novo horário
-     e status = 'rescheduled'
+MICROAGULHAMENTO ESTRIAS - Avaliar
+"Estimula regeneração da pele em estrias."
 
-3. cancel_appointment(appointment_id)
-   - Verificar se appointment_id existe
-   - UPDATE status = 'cancelled' no DuckDB
-   - Retornar confirmação
+DERMAPLENING - R$ 50,00
+"Esfoliação profunda que remove pelos faciais 
+e células mortas."
 
-4. get_upcoming_appointments(customer_name)
-   - SELECT no DuckDB filtrando por customer_name,
-     status IN ('scheduled','rescheduled')
-     e appointment_time > CURRENT_TIMESTAMP
-   - Retornar lista formatada em pt-BR
+NUTRI GLOSS - R$ 100,00
+"Hidratação intensa com brilho saudável."
 
-5. suggest_free_slots(date)
-   - Buscar no DuckDB todos horários ocupados na data
-   - Calcular horários livres entre 08:00 e 19:00
-     considerando 1 hora por procedimento
-   - Retornar lista de horários disponíveis
+DESIGN DE SOBRANCELHAS - R$ 30,00
+"Modelagem profissional respeitando o formato 
+do rosto."
 
-## ARQUIVO agent.py:
-- Conter apenas a lógica do agente Agno
-- Funções de tools (schedule, reschedule, cancel, etc)
-- Função init_db()
-- Instância do agente chamada "agent"
-- NÃO ter bloco if __name__ == "__main__"
-- Exportar o agent para ser importado pelo app.py
+MASSAGEM RELAXANTE - R$ 120,00
+"Alivia tensões musculares e estresse."
 
-## ARQUIVO app.py (Streamlit):
-- Importar o agent do agent.py
-- Chamar init_db() no início
-- Layout:
-  * Sidebar com logo texto "💆 Manustetic" em rosa
-  * Sidebar com lista dos serviços disponíveis
-  * Sidebar com horários de funcionamento
-  * Área principal com título "Assistente Manustetic"
-  * Subtítulo "Agende sua visita com exclusividade"
-  * Histórico de chat usando st.chat_message
-  * Input fixo no rodapé com st.chat_input
-- Cores: tons de rosa (#FF69B4) e branco
-- Inicializar st.session_state.messages como lista vazia
-- Cada mensagem do usuário chama agent.run()
-  e exibe a resposta no chat
-- Mostrar spinner "Consultando agenda..." enquanto processa
-- Contador de mensagens visível na sidebar
-- Limite de 15 mensagens por sessão com aviso elegante
+DRENAGEM CORPORAL - R$ 120,00
+"Estimula sistema linfático. Reduz inchaço 
+e celulite."
 
-## DOCKER:
-- docker-compose.yml deve mapear volume "." para "/app"
-  para persistir o appointments.db fora do container
-- Expor porta 8501 (padrão Streamlit)
-- Variáveis de ambiente via .env (GROQ_API_KEY)
-- Dockerfile baseado em python:3.11-slim
-- Comando de start: streamlit run app.py --server.port=8501
-  --server.address=0.0.0.0
+MASSAGEM MIOFACIAL - R$ 130,00
+"Massagem profunda em fáscias musculares. 
+Ideal para dores crônicas."
 
-## REQUIREMENTS:
-agno
-groq
-duckdb
-streamlit
-python-dotenv
+EPILAÇÃO A LASER - Avaliar
+"Remoção definitiva de pelos com tecnologia 
+a laser."
 
-## EXEMPLO DE INTERAÇÃO ESPERADA:
-Cliente: "Quero agendar botox para 25-04-2026 às 14:00"
-Agente: "Esse horário já está reservado.
-         Posso oferecer as seguintes opções:
-         - 25-04-2026 às 15:00
-         - 25-04-2026 às 16:00
-         - 26-04-2026 às 08:00
-         Qual prefere, [nome do cliente]?"
+## NOVAS FUNCIONALIDADES:
 
-## PARA RODAR:
-docker compose up --build
-Acessar: http://localhost:8501
+LOGS:
+- Salvar em manustetic.log
+- Registrar tools, erros, tracebacks
+
+LANGSMITH (monitoramento do agente):
+- Integrar LangSmith para rastrear chamadas
+- Variáveis no .env:
+  LANGCHAIN_TRACING_V2=true
+  LANGCHAIN_API_KEY=sua_chave
+  LANGCHAIN_PROJECT=manustetic
+- Rastrear cada interação do agente
+- Visualizar fluxo das tools chamadas
+- Ver tokens consumidos por mensagem
+
+NOME E MEMÓRIA:
+- Perguntar nome na primeira mensagem
+- Salvar no session_state
+- Cumprimentar pelo nome
+
+CADASTRO COMPLETO LGPD:
+Tabela customers no SQLite:
+- id, name, phone, email, birthday
+- accept_marketing (bool)
+- created_at, last_visit, total_appointments
+
+REQUIREMENTS:
+- pytz
+- langsmith
