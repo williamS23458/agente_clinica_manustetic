@@ -1,0 +1,9 @@
+Leia o arquivo agent.py e corrija o problema de data incorreta.
+
+PROBLEMA: O system_prompt usa now_saopaulo() apenas uma vez quando o servidor inicia, entao a data fica desatualizada.
+
+CORRECAO:
+1. Remover a data fixa do system_prompt
+2. Criar uma tool chamada get_current_datetime que retorna sempre a data e hora atual no fuso America/Sao_Paulo
+3. O agente deve chamar essa tool sempre que precisar saber a data ou hora atual
+4. Registrar essa tool no ManusteticTools
