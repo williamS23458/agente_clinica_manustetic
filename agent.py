@@ -256,13 +256,14 @@ REGRAS:
 1. Pergunte o nome na PRIMEIRA interação
 2. MANTENHA o nome e contexto durante TODA conversa
 3. Confirme dados antes de agendar
-4. Use add_appointment para criar agendamentos (ela delega automaticamente para o ScheduleAgent)
+4. Use add_appointment para criar agendamentos. Ela já verifica conflitos internamente. Se add_appointment retornar sucesso, o horário está confirmado. Se retornar erro, informe o cliente e sugira outros horários.
 5. Para cancelar: use cancel_appointment do ManusteticTools
 6. Para ver disponibilidade: use get_available_slots
 7. NÃO mostre erros técnicos ao cliente
 8. NUNCA esqueça informações já fornecidas
 9. Para obter a data/hora atual: use get_current_datetime (chame sempre que precisar da data/hora real)
 10. IMPORTANTE: Antes de qualquer resposta que envolva data ou hora, SEMPRE chame a tool get_current_datetime para obter a data atual. NUNCA assuma a data — sempre consulte a tool.
+11. CRÍTICO: NUNCA bloqueie um horário por "conflito" sem antes chamar add_appointment. O ScheduleAgent verifica conflitos automaticamente. Se o cliente quiser agendar às 8h, simplesmente chame add_appointment — não faça verificações manuais de sobreposição.
 """
 
 class ScheduleAgentTools(Toolkit):
@@ -327,39 +328,51 @@ class ScheduleAgentTools(Toolkit):
     @tool
     def create_appointment(self, customer_name: str, service: str, date: str, time: str, phone: str = None) -> str:
         """Cria um novo agendamento após verificar disponibilidade.
+        Esta tool JÁ CHAMA check_availability internamente. NÃO use check_availability antes.
         
         Args:
             customer_name: Nome do cliente
             service: Nome do serviço
-            date: Data do agendamento
-            time: Horário do agendamento
+            date: Data do agendamento (formato YYYY-MM-DD ou natural como 'hoje')
+            time: Horário do agendamento (formato HH:MM)
             phone: Telefone (opcional)
         
         Returns:
-            Confirmação ou erro
+            Confirmação ou erro com detalhes dos conflitos se houver
         """
         try:
             pd = parse_natural_date(date) or date
             if not pd:
-                return f"Data '{date}' inválida."
+                return json.dumps({"success": False, "error": f"Data '{date}' inválida."})
             
             if service not in SERVICE_NAMES:
-                return f"Serviço '{service}' não encontrado. Disponíveis: {', '.join(SERVICE_NAMES)}"
+                return json.dumps({"success": False, "error": f"Serviço '{service}' não encontrado."})
             
             # Verifica horário de expediente
             try:
                 h = int(time.split(":")[0])
                 if h < 8 or h >= 19:
-                    return "Horário fora do expediente (08:00 às 19:00)."
+                    return json.dumps({"success": False, "error": "Horário fora do expediente (08:00 às 19:00)."})
             except:
-                return f"Horário '{time}' inválido."
+                return json.dumps({"success": False, "error": f"Horário '{time}' inválido."})
             
-            # Verifica conflito
+            # Verifica conflito com sobreposição real de horários
             duration = SERVICES[service]["duration"]
             has_conflict = check_time_conflict(pd, time, duration)
             
             if has_conflict:
-                return f"❌ Já existe agendamento em {time}. Posso verificar outros horários."
+                # Busca conflitos detalhados
+                conn = sqlite3.connect(DB_PATH)
+                c = conn.cursor()
+                c.execute("SELECT customer_name, service, appointment_time FROM appointments WHERE appointment_date = ? AND status != 'cancelado'", (pd,))
+                conflicts = c.fetchall()
+                conn.close()
+                return json.dumps({
+                    "success": False,
+                    "error": f" ❌ Horário {time} indisponível (conflito com agendamento existente).",
+                    "existing_appointments": [{"client": c[0], "service": c[1], "time": c[2]} for c in conflicts],
+                    "suggestion": "Verifique outros horários disponíveis."
+                })
             
             # Cria o agendamento
             conn = sqlite3.connect(DB_PATH)
@@ -369,11 +382,20 @@ class ScheduleAgentTools(Toolkit):
             conn.commit()
             conn.close()
             
-            return f"Agendamento confirmado! ✅\n\nCliente: {customer_name}\nServiço: {service}\nData: {pd}\nHorário: {time}\n\nAguardamos você! 🌿"
+            return json.dumps({
+                "success": True,
+                "message": "Agendamento confirmado! ✅",
+                "appointment": {
+                    "cliente": customer_name,
+                    "servico": service,
+                    "data": pd,
+                    "horario": time
+                }
+            })
             
         except Exception as e:
             logger.error(f"Erro create_appointment: {e}")
-            return f"Erro ao criar agendamento: {e}"
+            return json.dumps({"success": False, "error": str(e)})
 
     @tool
     def cancel_appointment(self, customer_name: str, date: str) -> str:
@@ -511,17 +533,21 @@ FUNÇÃO:
 Analisar e manipular a agenda de agendamentos. Você verifica conflitos, cancela e reagenda compromissos.
 
 REGRAS:
-1. Verifique SEMPRE se há conflito antes de qualquer operação
-2. Para cancelar: use cancel_appointment - marca como 'cancelado'
-3. Para reagendar: primeiro cancele o antigo, depois verifique disponibilidade no novo horário
-4. Retorne respostas claras sobre o resultado da operação
-5. NUNCA permita duplicidade de horários
+1. Verifique SEMAPE se há conflito ANTES de criar/reagendar usando check_availability
+2. SÓ reporte conflito se check_availability retornar {"available": false}
+3. Para cancelar: use cancel_appointment - marca como 'cancelado'
+4. Para reagendar: primeiro cancele o antigo, depois verifique disponibilidade no novo horário
+5. Retorne respostas claras sobre o resultado da operação
+6. NUNCA permita duplicidade de horários
+
+IMPORTANTE: A tool check_availability já faz o cálculo correto de sobreposição de horários usando a duração real de cada serviço. NÃO faça verificações manuais - confie no resultado da tool.
 
 OPERAÇÕES SUPORTADAS:
-- check_availability: verifica se dia/horário está livre
+- check_availability: verifica se dia/horário está livre (passa data em YYYY-MM-DD, hora em HH:MM, serviço e duração)
 - cancel_appointment: cancela agendamento ativo
 - reschedule_appointment: reagenda para novo dia/horário
 - get_appointments_by_date: lista agendamentos de um dia específico
+- create_appointment: cria agendamento após verificar disponibilidade
 """
 
 def create_schedule_agent():
