@@ -1,5 +1,4 @@
 agno
-groq
 streamlit
 python-dotenv
 langsmith
