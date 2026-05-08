@@ -1,0 +1,4 @@
+No agent.py troque os modelos:
+- primary_model de "moonshotai/kimi-k2.5" para "openai/gpt-oss-120b"
+- fallback_model mantem "google/gemma-4-26b-a4b-it:free"
+Fazer isso nas duas funcoes: create_schedule_agent e create_agent

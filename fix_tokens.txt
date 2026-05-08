@@ -1,0 +1,11 @@
+No agent.py faca duas correcoes:
+
+1. REDUZIR CONSUMO DE TOKENS:
+- Reduzir num_history_runs de 8 para 3
+- Limitar max_tokens para 512
+
+2. FALLBACK AUTOMATICO:
+- Modelo principal: Groq openai/gpt-oss-120b
+- Se Groq retornar rate limit error, trocar automaticamente para google/gemma-3-27b-it via Groq
+- Implementar try/except no create_agent
+- Registrar no log qual modelo esta sendo usado

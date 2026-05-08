@@ -7,7 +7,7 @@ from datetime import datetime, timedelta
 from dotenv import load_dotenv
 from zoneinfo import ZoneInfo
 from agno.agent import Agent
-from agno.models.groq import Groq
+from agno.models.openai import OpenAIChat
 from agno.tools.toolkit import Toolkit
 from agno.tools import tool
 
@@ -525,35 +525,96 @@ OPERAÇÕES SUPORTADAS:
 """
 
 def create_schedule_agent():
-    """Cria o agente especialista em agenda."""
-    return Agent(
-        name="ScheduleAgent",
-        model=Groq(
-            id="openai/gpt-oss-120b",
-            api_key=os.getenv("GROQ_API_KEY"),
-            temperature=0.3,
-            max_tokens=1024
-        ),
-        tools=[ScheduleAgentTools()],
-        description=schedule_agent_system_prompt,
-        add_history_to_context=False
-    )
+    """Cria o agente especialista em agenda com fallback automático via OpenRouter."""
+    primary_model = "openai/gpt-oss-120b"
+    fallback_model = "google/gemma-4-26b-a4b-it:free"
+    
+    try:
+        agent = Agent(
+            name="ScheduleAgent",
+            model=OpenAIChat(
+                id=primary_model,
+                api_key=os.getenv("OPENAI_API_KEY"),
+                base_url="https://openrouter.ai/api/v1",
+                temperature=0.3,
+                max_tokens=512
+            ),
+            tools=[ScheduleAgentTools()],
+            description=schedule_agent_system_prompt,
+            add_history_to_context=False
+        )
+        logger.info(f"ScheduleAgent usando modelo: {primary_model}")
+        return agent
+    except Exception as e:
+        error_msg = str(e).lower()
+        if "rate limit" in error_msg or "429" in error_msg or "quota" in error_msg:
+            logger.warning(f"Rate limit no modelo {primary_model}, tentando fallback: {fallback_model}")
+            agent = Agent(
+                name="ScheduleAgent",
+                model=OpenAIChat(
+                    id=fallback_model,
+                    api_key=os.getenv("OPENAI_API_KEY"),
+                    base_url="https://openrouter.ai/api/v1",
+                    temperature=0.3,
+                    max_tokens=512
+                ),
+                tools=[ScheduleAgentTools()],
+                description=schedule_agent_system_prompt,
+                add_history_to_context=False
+            )
+            logger.info(f"ScheduleAgent usando modelo fallback: {fallback_model}")
+            return agent
+        else:
+            logger.error(f"Erro ao criar ScheduleAgent: {e}")
+            raise
 
 def create_agent(session_id: str = None):
-    return Agent(
-        name="Manustetic",
-        model=Groq(
-            id="openai/gpt-oss-120b",
-            api_key=os.getenv("GROQ_API_KEY"),
-            temperature=0.7,
-            max_tokens=1024
-        ),
-        tools=[ManusteticTools()],
-        description=system_prompt,
-        session_id=session_id,
-        add_history_to_context=True,
-        num_history_runs=8
-    )
+    """Cria o agente principal Manustetic com fallback automático via OpenRouter."""
+    primary_model = "openai/gpt-oss-120b"
+    fallback_model = "google/gemma-4-26b-a4b-it:free"
+    
+    try:
+        agent = Agent(
+            name="Manustetic",
+            model=OpenAIChat(
+                id=primary_model,
+                api_key=os.getenv("OPENAI_API_KEY"),
+                base_url="https://openrouter.ai/api/v1",
+                temperature=0.7,
+                max_tokens=512
+            ),
+            tools=[ManusteticTools()],
+            description=system_prompt,
+            session_id=session_id,
+            add_history_to_context=True,
+            num_history_runs=3
+        )
+        logger.info(f"Manustetic usando modelo: {primary_model}")
+        return agent
+    except Exception as e:
+        error_msg = str(e).lower()
+        if "rate limit" in error_msg or "429" in error_msg or "quota" in error_msg:
+            logger.warning(f"Rate limit no modelo {primary_model}, tentando fallback: {fallback_model}")
+            agent = Agent(
+                name="Manustetic",
+                model=OpenAIChat(
+                    id=fallback_model,
+                    api_key=os.getenv("OPENAI_API_KEY"),
+                    base_url="https://openrouter.ai/api/v1",
+                    temperature=0.7,
+                    max_tokens=512
+                ),
+                tools=[ManusteticTools()],
+                description=system_prompt,
+                session_id=session_id,
+                add_history_to_context=True,
+                num_history_runs=3
+            )
+            logger.info(f"Manustetic usando modelo fallback: {fallback_model}")
+            return agent
+        else:
+            logger.error(f"Erro ao criar Manustetic: {e}")
+            raise
 
 init_db()
 logger.info("Agente Manustetic inicializado com sucesso")

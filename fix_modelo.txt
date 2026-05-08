@@ -1,0 +1,12 @@
+No agent.py substitua o modelo Groq pelo OpenRouter:
+
+1. Remover: from agno.models.groq import Groq
+2. Adicionar: from agno.models.openai import OpenAIChat
+3. No create_agent e create_schedule_agent trocar para:
+   OpenAIChat(
+       id="moonshotai/kimi-k2.5",
+       api_key=os.getenv("OPENAI_API_KEY"),
+       base_url="https://openrouter.ai/api/v1"
+   )
+4. Fallback automatico: se der rate limit trocar para google/gemma-4-26b-a4b-it:free via OpenRouter
+5. Remover qualquer referencia a GROQ_API_KEY
