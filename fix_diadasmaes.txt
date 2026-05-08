@@ -1,0 +1,20 @@
+No app.py adicione um banner especial de Dia das Maes no topo da area principal do chat, acima das mensagens.
+
+O banner deve ter:
+- Fundo rosa suave ou dourado com emojis de flores
+- Titulo: "💐 Especial Dia das Mães"
+- Tres cards lado a lado com os protocolos:
+
+Protocolo Cuide-se Bem — De R$180 por R$149
+Inclui: Design de sobrancelhas, Nutrigloss, Hidratacao facial, Massagem facial
+
+Protocolo Momento Relax — De R$240 por R$199
+Inclui: Limpeza de pele, Hidragloss, Drenagem facial, Massagem craniana, Massagem nos pes
+
+Protocolo Dia de Rainha — De R$280 por R$235
+Inclui: Massagem relaxante, Hidratacao facial, Nutrigloss, Massagem facial, Massagem nos pes, Massagem craniana
+
+- Cada card com preco riscado e preco promocional em destaque
+- Texto no rodape do banner: "Valido ate 11/05 - Agende pelo chat!"
+- Botao: "Quero agendar meu protocolo!"
+- O banner deve ser visivel mas nao poluir o chat

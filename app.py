@@ -401,6 +401,139 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
+# Banner Especial Dia das Mães
+st.markdown("""
+<style>
+    .mothers-day-banner {
+        background: linear-gradient(135deg, #FFE4E1 0%, #FFDAB9 50%, #FFF8DC 100%);
+        border-radius: 15px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 4px 20px rgba(212, 175, 55, 0.3);
+        border: 2px solid #DAA520;
+    }
+    .mothers-day-title {
+        text-align: center;
+        color: #8B4513 !important;
+        font-size: 1.8rem !important;
+        margin-bottom: 1rem;
+        text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+    }
+    .mothers-day-cards {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        flex-wrap: wrap;
+        margin-bottom: 1rem;
+    }
+    .mothers-day-card {
+        background: linear-gradient(135deg, #FFF 0%, #FFF5EE 100%);
+        border-radius: 12px;
+        padding: 1rem;
+        width: 280px;
+        border: 2px solid #DDA0DD;
+        box-shadow: 0 3px 10px rgba(0,0,0,0.15);
+        transition: transform 0.3s ease;
+    }
+    .mothers-day-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+    }
+    .mothers-day-card h4 {
+        color: #8B008B !important;
+        margin: 0 0 0.5rem 0;
+        font-size: 1.1rem !important;
+    }
+    .mothers-day-card .old-price {
+        text-decoration: line-through;
+        color: #999;
+        font-size: 0.9rem;
+    }
+    .mothers-day-card .new-price {
+        color: #228B22;
+        font-size: 1.4rem;
+        font-weight: bold;
+    }
+    .mothers-day-card .includes {
+        color: #555;
+        font-size: 0.85rem;
+        margin-top: 0.5rem;
+        line-height: 1.4;
+    }
+    .mothers-day-footer {
+        text-align: center;
+        color: #8B4513;
+        font-weight: 600;
+        font-size: 0.95rem;
+        margin-top: 0.5rem;
+    }
+    .mothers-day-btn {
+        display: inline-block;
+        background: linear-gradient(135deg, #DDA0DD 0%, #DA70D6 100%) !important;
+        color: #FFF !important;
+        padding: 0.8rem 2rem !important;
+        border-radius: 25px !important;
+        text-decoration: none !important;
+        font-weight: bold !important;
+        border: 2px solid #8B008B !important;
+        box-shadow: 0 4px 15px rgba(218, 112, 214, 0.4) !important;
+        transition: all 0.3s ease !important;
+    }
+    .mothers-day-btn:hover {
+        transform: scale(1.05);
+        box-shadow: 0 6px 20px rgba(218, 112, 214, 0.6) !important;
+    }
+</style>
+
+<div class="mothers-day-banner">
+    <h2 class="mothers-day-title">🌸💐 Especial Dia das Mães 💐🌸</h2>
+    <div class="mothers-day-cards">
+        <div class="mothers-day-card">
+            <h4>✨ Protocolo Cuide-se Bem</h4>
+            <span class="old-price">De R$180</span>
+            <span class="new-price"> por R$149</span>
+            <div class="includes">
+                🌷 Design de sobrancelhas<br>
+                🌷 Nutrigloss<br>
+                🌷 Hidratação facial<br>
+                🌷 Massagem facial
+            </div>
+        </div>
+        <div class="mothers-day-card">
+            <h4>✨ Protocolo Momento Relax</h4>
+            <span class="old-price">De R$240</span>
+            <span class="new-price"> por R$199</span>
+            <div class="includes">
+                🌷 Limpeza de pele<br>
+                🌷 Hidragloss<br>
+                🌷 Drenagem facial<br>
+                🌷 Massagem craniana<br>
+                🌷 Massagem nos pés
+            </div>
+        </div>
+        <div class="mothers-day-card">
+            <h4>👑 Protocolo Dia de Rainha</h4>
+            <span class="old-price">De R$280</span>
+            <span class="new-price"> por R$235</span>
+            <div class="includes">
+                🌷 Massagem relaxante<br>
+                🌷 Hidratação facial<br>
+                🌷 Nutrigloss<br>
+                🌷 Massagem facial<br>
+                🌷 Massagem nos pés<br>
+                🌷 Massagem craniana
+            </div>
+        </div>
+    </div>
+    <div style="text-align: center; margin: 1rem 0;">
+        <p class="mothers-day-footer">⏰ Válido até 11/05 - Agende pelo chat!</p>
+    </div>
+    <div style="text-align: center;">
+        <a href="https://wa.me/5511951863253" target="_blank" class="mothers-day-btn">Quero agendar meu protocolo! 💖</a>
+    </div>
+</div>
+""", unsafe_allow_html=True)
+
 if st.session_state.first_interaction and len(st.session_state.messages) == 0:
     welcome = "Olá! Bem-vinda à Manu Santos Esthetic 👑\n\nSou sua assistente virtual e estou aqui para ajudá-la a agendar seu tratamento estético.\n\nComo posso chamá-la?"
     st.session_state.messages.append({"role": "assistant", "content": welcome})
