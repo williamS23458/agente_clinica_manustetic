@@ -17,7 +17,14 @@ import re
 import uuid
 from agent import create_agent, init_db, SERVICES, SERVICE_NAMES, now_saopaulo
 
-init_db()
+# Inicializa DB com tratamento de erro para deploy no Streamlit Cloud
+try:
+    init_db()
+except Exception as e:
+    st.error(f"Erro ao inicializar banco de dados: {e}")
+    # Usa DB em memória se não conseguir escrever no disco
+    os.environ["AGENDA_DB_PATH"] = ":memory:"
+    init_db()
 
 st.set_page_config(
     page_title="Manu Santos Estetic - Assistente Virtual",
@@ -582,7 +589,7 @@ st.markdown("""
         </div>
     </div>
     <div style="text-align: center; margin: 1rem 0;">
-        <p class="mothers-day-footer">⏰ Válido até 11/05 - Agende pelo chat!</p>
+        <p class="mothers-day-footer">⏰ Válido até <strong>10/05/2026</strong> — Agende pelo chat!</p>
     </div>
     <div style="text-align: center;">
         <a href="https://wa.me/5511951863253" target="_blank" class="mothers-day-btn">Quero agendar meu protocolo! 💖</a>
@@ -591,7 +598,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 if st.session_state.first_interaction and len(st.session_state.messages) == 0:
-    welcome = "Olá! Bem-vinda à Manu Santos Estetic 👑\n\nSou sua assistente virtual e estou aqui para ajudá-la a agendar seu tratamento estético.\n\nComo posso chamá-la?"
+    welcome = "Olá! Bem-vinda à Manu Santos Estetic 👑\n\nSou sua assistente virtual e estou aqui para ajudá-la a agendar seu tratamento estético.\n\nComo posso te ajudar hoje? 😊"
     st.session_state.messages.append({"role": "assistant", "content": welcome})
     st.session_state.first_interaction = False
 

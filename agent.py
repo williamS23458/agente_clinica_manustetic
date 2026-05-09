@@ -141,7 +141,7 @@ SERVICES = {
 }
 
 SERVICE_NAMES = list(SERVICES.keys())
-DB_PATH = "appointments.db"
+DB_PATH = os.getenv("AGENDA_DB_PATH", "appointments.db")
 
 def init_db():
     conn = sqlite3.connect(DB_PATH)
