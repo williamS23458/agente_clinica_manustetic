@@ -1,8 +1,0 @@
-No agent.py existe um bug: o agente esta dizendo que horarios estao ocupados quando na verdade estao livres.
-
-Exemplo: dia 08/05 so tem agendamento as 18h, mas o agente disse que 8h e 11h tem "problema".
-
-Verifique a funcao check_time_conflict e a tool check_availability do ScheduleAgent.
-O problema pode ser que o calculo de sobreposicao de horario esta errado, ou o ScheduleAgent esta interpretando o resultado incorretamente.
-
-Corrija para que o agente so bloqueie horarios que realmente estao ocupados.

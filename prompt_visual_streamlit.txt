@@ -1,4 +1,4 @@
-Preciso que você edite o arquivo app.py do projeto Manu Santos Esthetic (agendador estético com Streamlit).
+Preciso que você edite o arquivo app.py do projeto Manu Santos Estetic (agendador estético com Streamlit).
 
 NÃO mexa no agent.py.
 

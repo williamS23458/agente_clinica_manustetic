@@ -38,6 +38,7 @@ ENV/
 
 # Streamlit
 .streamlit/
+.streamlit/secrets.toml
 
 # IDE
 .vscode/
@@ -51,3 +52,13 @@ Thumbs.db
 *.log
 erros.txt
 conversas_antigas.log
+
+# Credentials
+credentials.json
+
+# Database
+appointments.db
+
+# Python cache
+__pycache__/
+*.pyc

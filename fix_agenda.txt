@@ -1,8 +1,0 @@
-Leia o arquivo agent.py e corrija o bug de conflito de horario.
-
-REGRA: Nunca permitir dois agendamentos no mesmo dia e horario.
-
-1. Adicionar campo status na tabela appointments: ativo ou cancelado. Nunca deletar, apenas marcar como cancelado.
-2. Corrigir check_time_conflict para ignorar apenas registros com status cancelado.
-3. Corrigir cancel_appointment para fazer UPDATE status=cancelado ao inves de DELETE.
-4. Criar agente verificador que consulta o banco ANTES de agendar e so libera se horario estiver livre.

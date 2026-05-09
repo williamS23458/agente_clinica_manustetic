@@ -1,0 +1,29 @@
+Revise e corrija todo o projeto agente_clinica_manustetic. Leia os arquivos agent.py e app.py antes de qualquer alteracao.
+
+PROBLEMAS A CORRIGIR:
+
+1. HORARIO INVALIDO
+Se o usuario digitar "145 horas" ou qualquer horario invalido, retornar erro pedindo formato correto (ex: "14:00" ou "14 horas"). Nao interpretar 145 como 14:50.
+
+2. DEPLOY NAO FUNCIONA
+O projeto roda em localhost mas nao no Streamlit Cloud. Verificar se ha alguma dependencia ou configuracao que causa erro no deploy.
+
+3. REMOVER LIXO
+Remover todos os arquivos .txt de instrucoes (fix_agenda.txt, fix_data.txt, fix_data2.txt, fix_modelo.txt, fix_modelo2.txt, fix_tokens.txt, fix_horario.txt, fix_horario2.txt) pois sao lixo do projeto.
+
+4. NOME DA CLINICA
+Trocar "Manu Santos Estetic" para "Manu Santos Estetic" em todos os arquivos.
+
+5. CORES
+Manter tema verde musgo e branco. Cores: fundo #3A4232, cards #4A5240, botoes #7A9B6B, texto #F5F0E8. Manter todos os emojis.
+
+6. GOOGLE AGENDA
+Integrar com Google Agenda para que cada agendamento confirmado seja automaticamente adicionado ao Google Calendar da Manu. Usar a biblioteca google-api-python-client. Adicionar ao requirements.txt.
+
+7. MANTER O QUE FUNCIONA
+- Banner Dia das Maes
+- Botao WhatsApp condicional
+- 2 agentes (Manustetic + ScheduleAgent)
+- Fallback Gemma 4
+- Data em tempo real
+- Conflito de horario corrigido

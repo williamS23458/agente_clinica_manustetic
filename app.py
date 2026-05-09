@@ -2,15 +2,25 @@
 Aplicativo Streamlit para o Agente Manustetic
 """
 import os
+import sys
+
+# Configurar variáveis de ambiente a partir do st.secrets (Streamlit Cloud) antes de importar o agent
+import streamlit as st
+
+# Tenta carregar secrets do Streamlit Cloud
+if hasattr(st, 'secrets'):
+    for key in ['OPENAI_API_KEY', 'GOOGLE_CALENDAR_ID']:
+        if key in st.secrets and not os.getenv(key):
+            os.environ[key] = st.secrets[key]
+
 import re
 import uuid
-import streamlit as st
 from agent import create_agent, init_db, SERVICES, SERVICE_NAMES, now_saopaulo
 
 init_db()
 
 st.set_page_config(
-    page_title="Manu Santos Esthetic - Assistente Virtual",
+    page_title="Manu Santos Estetic - Assistente Virtual",
     page_icon="👑",
     layout="wide",
     initial_sidebar_state="expanded"
@@ -319,6 +329,34 @@ NOMES_INVALIDOS = [
     "obrigada", "obrigado", "tchau", "ate logo"
 ]
 
+# Padrões de prompt injection para bloquear
+PROMPT_INJECTION_PATTERNS = [
+    r"ignore\s+(suas?\s+)?instru\w*",
+    r"esque\w+\s+tudo",
+    r"agora\s+voc\w+\s+\w+\s+outr[oa]\s+(agente|assistente|pessoa)",
+    r"revele\s+(seu\s+)?(prompt|system\s*prompt|instru\w+)",
+    r"mostre\s+(?:su[ao]s?\s+)?(prompt|system\s*prompt|instru\w+)",
+    r"imprima\s+(?:su[ao]s?\s+)?(prompt|system\s*prompt|instru\w+)",
+    r"print\s+(your\s+)?(prompt|system\s*prompt|instructions)",
+    r"ignore\s+previous\s+instructions",
+    r"forget\s+everything",
+    r"you\s+are\s+now\s+a",
+    r"system\s*:?\s*ignore",
+    r"new\s+instructions\s*:",
+    r"role\s*:?\s*play",
+]
+
+
+def detect_prompt_injection(text):
+    """Verifica se a mensagem do usuário contém tentativa de prompt injection."""
+    if not text:
+        return False
+    text_lower = text.lower()
+    for pattern in PROMPT_INJECTION_PATTERNS:
+        if re.search(pattern, text_lower):
+            return True
+    return False
+
 # Session state
 if "session_id" not in st.session_state:
     st.session_state.session_id = str(uuid.uuid4())
@@ -336,7 +374,7 @@ if "show_treatments" not in st.session_state:
 MAX_MESSAGES = 30
 
 with st.sidebar:
-    st.markdown("<div class='logo-text'>👑 Manu Santos Esthetic</div>", unsafe_allow_html=True)
+    st.markdown("<div class='logo-text'>👑 Manu Santos Estetic</div>", unsafe_allow_html=True)
     st.markdown("<div class='logo-subtitle'>Estética & Bem-estar</div>", unsafe_allow_html=True)
 
     # Badges decorativos
@@ -393,6 +431,24 @@ with st.sidebar:
         st.session_state.session_id = str(uuid.uuid4())
         st.rerun()
 
+
+st.markdown("""
+<style>
+    .lgpd-banner {
+        background: #2C3E2C;
+        border: 1px solid #7A9B6B;
+        border-radius: 10px;
+        padding: 0.75rem;
+        margin-bottom: 1rem;
+        text-align: center;
+        font-size: 0.85rem;
+        color: #D4C9A8;
+    }
+</style>
+<div class='lgpd-banner'>
+    🔒 <strong>Privacidade garantida</strong> — Seus dados são opcionais e usados apenas para lembretes e promoções, conforme a <em>LGPD</em>.
+</div>
+""", unsafe_allow_html=True)
 
 st.markdown("""
 <div style='background: linear-gradient(90deg, #3A4232 0%, #4A5240 30%, #5A6B4A 50%, #4A5240 70%, #3A4232 100%); padding: 1.5rem; border-radius: 15px; margin-bottom: 1.5rem; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.3);'>
@@ -535,7 +591,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 if st.session_state.first_interaction and len(st.session_state.messages) == 0:
-    welcome = "Olá! Bem-vinda à Manu Santos Esthetic 👑\n\nSou sua assistente virtual e estou aqui para ajudá-la a agendar seu tratamento estético.\n\nComo posso chamá-la?"
+    welcome = "Olá! Bem-vinda à Manu Santos Estetic 👑\n\nSou sua assistente virtual e estou aqui para ajudá-la a agendar seu tratamento estético.\n\nComo posso chamá-la?"
     st.session_state.messages.append({"role": "assistant", "content": welcome})
     st.session_state.first_interaction = False
 
@@ -562,6 +618,18 @@ if st.session_state.message_count >= MAX_MESSAGES:
     """, unsafe_allow_html=True)
 else:
     if prompt := st.chat_input("Digite sua mensagem..."):
+        # Verifica tentativa de prompt injection
+        if detect_prompt_injection(prompt):
+            st.session_state.messages.append({"role": "user", "content": prompt})
+            st.session_state.message_count += 1
+            with st.chat_message("user"):
+                st.markdown(prompt)
+            with st.chat_message("assistant"):
+                response_content = "Desculpe, não posso ajudar com isso. Estou aqui para falar sobre nossos tratamentos estéticos e agendamentos. Como posso ajudá-la hoje? 🌿"
+                st.markdown(response_content)
+            st.session_state.messages.append({"role": "assistant", "content": response_content})
+            st.stop()
+
         st.session_state.messages.append({"role": "user", "content": prompt})
         st.session_state.message_count += 1
 

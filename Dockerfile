@@ -16,7 +16,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copiar código da aplicação
 COPY agent.py .
 COPY app.py .
-COPY .env.example .env
+
+# Criar .env vazio (será sobrescrito por variáveis de ambiente ou st.secrets)
+RUN touch .env
 
 # Expor porta do Streamlit
 EXPOSE 8501

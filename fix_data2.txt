@@ -1,5 +1,0 @@
-O agente ainda esta retornando a data errada. O problema é que ele nao chama get_current_datetime automaticamente no inicio da conversa.
-
-CORRECAO:
-No system_prompt do agente principal, adicionar uma instrucao OBRIGATORIA:
-"IMPORTANTE: Antes de qualquer resposta que envolva data ou hora, SEMPRE chame a tool get_current_datetime para obter a data atual. NUNCA assuma a data — sempre consulte a tool."
