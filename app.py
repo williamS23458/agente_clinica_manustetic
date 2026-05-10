@@ -15,7 +15,11 @@ if hasattr(st, 'secrets'):
 
 import re
 import uuid
+import agent
 from agent import create_agent, init_db, SERVICES, SERVICE_NAMES, now_saopaulo
+
+# Sincroniza domingos especiais com o agente
+agent.SPECIAL_SUNDAY_DATES = ["2026-05-11"]
 
 # Inicializa DB com tratamento de erro para deploy no Streamlit Cloud
 try:
@@ -371,6 +375,8 @@ if "messages" not in st.session_state:
     st.session_state.messages = []
 if "customer_name" not in st.session_state:
     st.session_state.customer_name = None
+if "customer_phone" not in st.session_state:
+    st.session_state.customer_phone = None
 if "first_interaction" not in st.session_state:
     st.session_state.first_interaction = True
 if "message_count" not in st.session_state:
@@ -432,11 +438,16 @@ with st.sidebar:
     if st.button("🔄 Novo Chat"):
         st.session_state.messages = []
         st.session_state.customer_name = None
+        st.session_state.customer_phone = None
         st.session_state.first_interaction = True
         st.session_state.message_count = 0
         st.session_state.show_treatments = False
         st.session_state.session_id = str(uuid.uuid4())
         st.rerun()
+
+    # Texto LGPD discreto no rodapé da sidebar
+    st.markdown("<div class='divider'></div>", unsafe_allow_html=True)
+    st.markdown("<p style='text-align: center; font-size: 0.75rem; color: #8B9B7B; margin-top: 1rem;'>Seus dados são usados apenas para agendamento. LGPD Lei 13.709/2018</p>", unsafe_allow_html=True)
 
 
 st.markdown("""
@@ -598,7 +609,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 if st.session_state.first_interaction and len(st.session_state.messages) == 0:
-    welcome = "Olá! Bem-vinda à Manu Santos Estetic 👑\n\nSou sua assistente virtual e estou aqui para ajudá-la a agendar seu tratamento estético.\n\nComo posso te ajudar hoje? 😊"
+    welcome = "Olá! Bem-vinda à Manu Santos Estetic 👑\n\nSou sua assistente virtual e estou aqui para ajudá-la a agendar seu tratamento estético.\n\nPara começar, poderia me informar seu nome e telefone? 😊"
     st.session_state.messages.append({"role": "assistant", "content": welcome})
     st.session_state.first_interaction = False
 
@@ -643,17 +654,25 @@ else:
         with st.chat_message("user"):
             st.markdown(prompt)
 
-        # Captura nome filtrando palavras invalidas
+        # Captura nome e telefone
         if st.session_state.customer_name is None and len(st.session_state.messages) <= 4:
             words = prompt.strip().split()
             if 1 <= len(words) <= 3 and prompt.strip().lower() not in NOMES_INVALIDOS:
                 st.session_state.customer_name = prompt.strip()
+        
+        # Tenta extrair telefone se ainda não tiver
+        if st.session_state.customer_phone is None:
+            phone_match = re.search(r'\b(\d{10,11})\b', re.sub(r'\D', '', prompt))
+            if phone_match:
+                st.session_state.customer_phone = phone_match.group(1)
 
         with st.chat_message("assistant"):
             with st.spinner("Consultando agenda..."):
                 context_parts = []
                 if st.session_state.customer_name:
                     context_parts.append(f"Nome da cliente: {st.session_state.customer_name}")
+                if st.session_state.customer_phone:
+                    context_parts.append(f"Telefone da cliente: {st.session_state.customer_phone}")
                 for msg in st.session_state.messages[:-1]:
                     role = "Cliente" if msg["role"] == "user" else "Assistente"
                     context_parts.append(f"{role}: {msg['content']}")
